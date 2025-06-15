@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <title>სამკუთხა და ტეტრაედრული რიცხვების თამაში</title>
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
+    h1 { color: #333; }
+    button { margin: 5px; padding: 10px 20px; font-size: 16px; }
+    input { padding: 5px; font-size: 16px; width: 50px; }
+    #result { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h1>🎲 სამკუთხა და ტეტრაედრული რიცხვების თამაში</h1>
+
+<p>აირჩიე ტიპი:</p>
+<button onclick="setType('triangular')">სამკუთხა რიცხვი</button>
+<button onclick="setType('tetrahedral')">ტეტრაედრული რიცხვი</button>
+<button onclick="endGame()">თამაშის დასრულება</button>
+
+<div id="gameArea" style="margin-top: 20px; display: none;">
+  <p>🔢 შეიყვანე ფენების რაოდენობა (1-10):</p>
+  <input type="number" id="layersInput" min="1" max="10">
+  <button onclick="askGuess()">დადასტურება</button>
+</div>
+
+<div id="guessArea" style="display: none;">
+  <p id="question"></p>
+  <input type="number" id="guessInput">
+  <button onclick="checkGuess()">შეამოწმე</button>
+</div>
+
+<div id="result"></div>
+<div id="score" style="margin-top: 10px;"></div>
+
+<script>
+let gameType = "";
+let layers = 0;
+let score = 0;
+let attempts = 0;
+let correctAnswer = 0;
+
+function setType(type) {
+  gameType = type;
+  document.getElementById("gameArea").style.display = "block";
+  document.getElementById("guessArea").style.display = "none";
+  document.getElementById("result").innerText = "";
+}
+
+function askGuess() {
+  layers = parseInt(document.getElementById("layersInput").value);
+  if (isNaN(layers) || layers < 1 || layers > 10) {
+    alert("⚠ ფენების რაოდენობა უნდა იყოს 1-დან 10-მდე.");
+    return;
+  }
+
+  if (gameType === "triangular") {
+    correctAnswer = triangular(layers);
+    document.getElementById("question").innerText = `❓ რამდენი წერტილია სამკუთხე ${layers} ფენით?`;
+  } else {
+    correctAnswer = tetrahedral(layers);
+    document.getElementById("question").innerText = `❓ რამდენი წერტილია ტეტრაედრი ${layers} ფენით?`;
+  }
+
+  document.getElementById("guessArea").style.display = "block";
+}
+
+function checkGuess() {
+  const guess = parseInt(document.getElementById("guessInput").value);
+  attempts++;
+
+  if (guess === correctAnswer) {
+    score++;
+    document.getElementById("result").innerText = "✅ სწორია! გილოცავ!";
+  } else {
+    document.getElementById("result").innerText = `❌ არასწორია. სწორი პასუხია: ${correctAnswer}`;
+  }
+
+  updateScore();
+  document.getElementById("gameArea").style.display = "none";
+  document.getElementById("guessArea").style.display = "none";
+}
+
+function triangular(n) {
+  return n * (n + 1) / 2;
+}
+
+function tetrahedral(n) {
+  return n * (n + 1) * (n + 2) / 6;
+}
+
+function updateScore() {
+  document.getElementById("score").innerText = `👉 ქულა: ${score} მცდელობა: ${attempts}`;
+}
+
+function endGame() {
+  alert(`🎉 თამაში დასრულდა. საბოლოო ქულა: ${score} მცდელობა: ${attempts}`);
+  score = 0;
+  attempts = 0;
+  updateScore();
+  document.getElementById("gameArea").style.display = "none";
+  document.getElementById("guessArea").style.display = "none";
+}
+</script>
+
+</body>
+</html>
