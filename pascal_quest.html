@@ -10,36 +10,53 @@
       background: #222;
       color: #fff;
       text-align: center;
+      margin: 0;
+      padding: 0;
     }
     #triangle {
       display: inline-block;
       margin-top: 20px;
+      max-width: 100%;
+      overflow-x: auto;
     }
     .row {
       display: flex;
       justify-content: center;
-      margin: 2px;
+      flex-wrap: wrap;
+      margin: 2px 0;
     }
     .cell {
       background: #3498db;
       border-radius: 5px;
-      padding: 5px 10px;
-      margin: 1px;
-      min-width: 20px;
+      padding: 8px 12px;
+      margin: 2px;
+      min-width: 24px;
+      font-size: 1rem;
       transition: background 0.3s;
     }
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 10px;
+      padding: 12px 24px;
+      font-size: 18px;
+      margin: 8px;
       cursor: pointer;
       border: none;
       border-radius: 5px;
       background: #e67e22;
       color: #fff;
+      width: 90%;
+      max-width: 300px;
     }
     button:hover {
       background: #d35400;
+    }
+    @media (min-width: 600px) {
+      button {
+        width: auto;
+      }
+      .cell {
+        font-size: 1.2rem;
+        padding: 10px 14px;
+      }
     }
   </style>
 </head>
@@ -53,10 +70,9 @@
   </div>
 
   <script>
-    const languages = ['en', 'ka', 'ru']; // English, Georgian, Russian
+    const languages = ['en', 'ka', 'ru'];
     let currentLangIndex = 0;
 
-    // ტექსტები სხვადასხვა ენებზე
     const texts = {
       en: {
         title: "🌟 Pascal Quest 🌟",
@@ -106,7 +122,6 @@
       });
     }
 
-    // ენის ტექსტების განახლება ელემენტებზე
     function updateTexts() {
       const lang = languages[currentLangIndex];
       document.getElementById('title').innerText = texts[lang].title;
@@ -134,12 +149,10 @@
       updateTexts();
     }
 
-    // ბმულების დაჭერაზე ფუნქციების მიბმა
     document.getElementById('btnAddRow').onclick = addRow;
     document.getElementById('btnChangeColors').onclick = changeColors;
     document.getElementById('btnChangeLang').onclick = changeLanguage;
 
-    // თავდაპირველი რენდერი და ტექსტების განახლება
     renderTriangle();
     updateTexts();
   </script>
