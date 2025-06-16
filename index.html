@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <title>სამკუთხა და ტეტრაედრული რიცხვების თამაში</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(to right, #1f1c2c, #928dab);
+      margin: 0;
+      padding: 20px;
+      color: #fff;
+      text-align: center;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #f1f1f1;
+    }
+    button {
+      background: #ffffff33;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 16px;
+      color: #fff;
+      cursor: pointer;
+      margin: 5px;
+      transition: background 0.3s, transform 0.2s;
+      width: auto;
+    }
+    button:hover {
+      background: #ffffff55;
+      transform: scale(1.05);
+    }
+    input[type="number"] {
+      padding: 10px;
+      font-size: 18px;
+      width: 100px;
+      border-radius: 5px;
+      border: none;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #result {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #score {
+      margin-top: 10px;
+    }
+    .lang-buttons {
+      margin-bottom: 15px;
+    }
+
+    /* მობილურისთვის */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+      button {
+        width: 100%;
+        font-size: 16px;
+        padding: 10px;
+      }
+      input[type="number"] {
+        width: 80%;
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1 id="gameTitle">🎲 სამკუთხა და ტეტრაედრული რიცხვების თამაში</h1>
+
+<div class="lang-buttons">
+  <button onclick="setLanguage('ka')">🇬🇪 ქართული</button>
+  <button onclick="setLanguage('ru')">🇷🇺 Русский</button>
+  <button onclick="setLanguage('en')">🇬🇧 English</button>
+</div>
+
+<p id="chooseType">აირჩიე ტიპი:</p>
+<button onclick="setType('triangular')" id="triangularBtn">სამკუთხა რიცხვი</button>
+<button onclick="setType('tetrahedral')" id="tetrahedralBtn">ტეტრაედრული რიცხვი</button>
+<button onclick="endGame()" id="endBtn">თამაშის დასრულება</button>
+
+<div id="gameArea" style="margin-top: 20px; display: none;">
+  <p id="enterLayers">🔢 შეიყვანე ფენების რაოდენობა (1-10):</p>
+  <input type="number" id="layersInput" min="1" max="10">
+  <br>
+  <button onclick="askGuess()" id="confirmBtn">დადასტურება</button>
+</div>
+
+<div id="guessArea" style="display: none;">
+  <p id="question"></p>
+  <input type="number" id="guessInput">
+  <br>
+  <button onclick="checkGuess()" id="checkBtn">შეამოწმე</button>
+</div>
+
+<div id="result"></div>
+<div id="score"></div>
+
+<script>
+let gameType = "";
+let layers = 0;
+let score = 0;
+let attempts = 0;
+let correctAnswer = 0;
+let lang = 'ka';
+
+const texts = {
+  ka: {
+    title: "🎲 სამკუთხა და ტეტრაედრული რიცხვების თამაში",
+    chooseType: "აირჩიე ტიპი:",
+    triangular: "სამკუთხა რიცხვი",
+    tetrahedral: "ტეტრაედრული რიცხვი",
+    endGame: "თამაშის დასრულება",
+    enterLayers: "🔢 შეიყვანე ფენების რაოდენობა (1-10):",
+    confirm: "დადასტურება",
+    check: "შეამოწმე",
+    correct: "✅ სწორია! გილოცავ!",
+    wrong: "❌ არასწორია. სწორი პასუხია: ",
+    score: "👉 ქულა",
+    attempts: "მცდელობა",
+    endMessage: "🎉 თამაში დასრულდა. საბოლოო ქულა:"
+  },
+  ru: {
+    title: "🎲 Игра с треугольными и тетраэдрическими числами",
+    chooseType: "Выберите тип:",
+    triangular: "Треугольное число",
+    tetrahedral: "Тетраэдрическое число",
+    endGame: "Завершить игру",
+    enterLayers: "🔢 Введите количество слоёв (1-10):",
+    confirm: "Подтвердить",
+    check: "Проверить",
+    correct: "✅ Верно! Поздравляем!",
+    wrong: "❌ Неверно. Правильный ответ: ",
+    score: "👉 Очки",
+    attempts: "Попытки",
+    endMessage: "🎉 Игра окончена. Итоговый счёт:"
+  },
+  en: {
+    title: "🎲 Triangular and Tetrahedral Numbers Game",
+    chooseType: "Choose type:",
+    triangular: "Triangular Number",
+    tetrahedral: "Tetrahedral Number",
+    endGame: "End Game",
+    enterLayers: "🔢 Enter number of layers (1-10):",
+    confirm: "Confirm",
+    check: "Check",
+    correct: "✅ Correct! Congratulations!",
+    wrong: "❌ Wrong. Correct answer is: ",
+    score: "👉 Score",
+    attempts: "Attempts",
+    endMessage: "🎉 Game over. Final score:"
+  }
+};
+
+function setLanguage(selectedLang) {
+  lang = selectedLang;
+  document.getElementById("gameTitle").innerText = texts[lang].title;
+  document.getElementById("chooseType").innerText = texts[lang].chooseType;
+  document.getElementById("triangularBtn").innerText = texts[lang].triangular;
+  document.getElementById("tetrahedralBtn").innerText = texts[lang].tetrahedral;
+  document.getElementById("endBtn").innerText = texts[lang].endGame;
+  document.getElementById("enterLayers").innerText = texts[lang].enterLayers;
+  document.getElementById("confirmBtn").innerText = texts[lang].confirm;
+  document.getElementById("checkBtn").innerText = texts[lang].check;
+}
+
+function setType(type) {
+  gameType = type;
+  document.getElementById("gameArea").style.display = "block";
+  document.getElementById("guessArea").style.display = "none";
+  document.getElementById("result").innerText = "";
+}
+
+function askGuess() {
+  layers = parseInt(document.getElementById("layersInput").value);
+  if (isNaN(layers) || layers < 1 || layers > 10) {
+    alert("⚠ " + texts[lang].enterLayers);
+    return;
+  }
+
+  if (gameType === "triangular") {
+    correctAnswer = triangular(layers);
+    document.getElementById("question").innerText = `❓ ${texts[lang].triangular} ${layers} → ?`;
+  } else {
+    correctAnswer = tetrahedral(layers);
+    document.getElementById("question").innerText = `❓ ${texts[lang].tetrahedral} ${layers} → ?`;
+  }
+
+  document.getElementById("guessArea").style.display = "block";
+}
+
+function checkGuess() {
+  const guess = parseInt(document.getElementById("guessInput").value);
+  attempts++;
+
+  if (guess === correctAnswer) {
+    score++;
+    document.getElementById("result").innerText = texts[lang].correct;
+  } else {
+    document.getElementById("result").innerText = `${texts[lang].wrong} ${correctAnswer}`;
+  }
+
+  updateScore();
+  document.getElementById("gameArea").style.display = "none";
+  document.getElementById("guessArea").style.display = "none";
+}
+
+function triangular(n) {
+  return n * (n + 1) / 2;
+}
+
+function tetrahedral(n) {
+  return n * (n + 1) * (n + 2) / 6;
+}
+
+function updateScore() {
+  document.getElementById("score").innerText = `${texts[lang].score}: ${score} ${texts[lang].attempts}: ${attempts}`;
+}
+
+function endGame() {
+  alert(`${texts[lang].endMessage} ${score} ${texts[lang].attempts}: ${attempts}`);
+  score = 0;
+  attempts = 0;
+  updateScore();
+  document.getElementById("gameArea").style.display = "none";
+  document.getElementById("guessArea").style.display = "none";
+}
+</script>
+
+</body>
+</html>
