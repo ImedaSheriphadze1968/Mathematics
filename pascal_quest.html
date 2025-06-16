@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pascal Quest Game with Languages</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #222;
+      color: #fff;
+      text-align: center;
+    }
+    #triangle {
+      display: inline-block;
+      margin-top: 20px;
+    }
+    .row {
+      display: flex;
+      justify-content: center;
+      margin: 2px;
+    }
+    .cell {
+      background: #3498db;
+      border-radius: 5px;
+      padding: 5px 10px;
+      margin: 1px;
+      min-width: 20px;
+      transition: background 0.3s;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: #e67e22;
+      color: #fff;
+    }
+    button:hover {
+      background: #d35400;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="title">🌟 Pascal Quest 🌟</h1>
+  <div id="triangle"></div>
+  <div>
+    <button id="btnAddRow">➕ Add Row</button>
+    <button id="btnChangeColors">🎨 Change Colors</button>
+    <button id="btnChangeLang">🌐 Change Language</button>
+  </div>
+
+  <script>
+    const languages = ['en', 'ka', 'ru']; // English, Georgian, Russian
+    let currentLangIndex = 0;
+
+    // ტექსტები სხვადასხვა ენებზე
+    const texts = {
+      en: {
+        title: "🌟 Pascal Quest 🌟",
+        addRow: "➕ Add Row",
+        changeColors: "🎨 Change Colors",
+        changeLang: "🌐 Change Language"
+      },
+      ka: {
+        title: "🌟 პასკალის დავალება 🌟",
+        addRow: "➕ რიგის დამატება",
+        changeColors: "🎨 ფერების შეცვლა",
+        changeLang: "🌐 ენის შეცვლა"
+      },
+      ru: {
+        title: "🌟 Задание Паскаля 🌟",
+        addRow: "➕ Добавить ряд",
+        changeColors: "🎨 Изменить цвета",
+        changeLang: "🌐 Сменить язык"
+      }
+    };
+
+    let triangleData = [[1]];
+
+    function generateNextRow() {
+      const prevRow = triangleData[triangleData.length - 1];
+      const newRow = [1];
+      for (let i = 0; i < prevRow.length - 1; i++) {
+        newRow.push(prevRow[i] + prevRow[i + 1]);
+      }
+      newRow.push(1);
+      triangleData.push(newRow);
+    }
+
+    function renderTriangle() {
+      const container = document.getElementById('triangle');
+      container.innerHTML = '';
+      triangleData.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'row';
+        row.forEach(num => {
+          const cellDiv = document.createElement('div');
+          cellDiv.className = 'cell';
+          cellDiv.innerText = num;
+          rowDiv.appendChild(cellDiv);
+        });
+        container.appendChild(rowDiv);
+      });
+    }
+
+    // ენის ტექსტების განახლება ელემენტებზე
+    function updateTexts() {
+      const lang = languages[currentLangIndex];
+      document.getElementById('title').innerText = texts[lang].title;
+      document.getElementById('btnAddRow').innerText = texts[lang].addRow;
+      document.getElementById('btnChangeColors').innerText = texts[lang].changeColors;
+      document.getElementById('btnChangeLang').innerText = texts[lang].changeLang;
+    }
+
+    function addRow() {
+      generateNextRow();
+      renderTriangle();
+    }
+
+    function changeColors() {
+      document.querySelectorAll('.cell').forEach(cell => {
+        const r = Math.floor(Math.random() * 200 + 50);
+        const g = Math.floor(Math.random() * 200 + 50);
+        const b = Math.floor(Math.random() * 200 + 50);
+        cell.style.backgroundColor = `rgb(${r},${g},${b})`;
+      });
+    }
+
+    function changeLanguage() {
+      currentLangIndex = (currentLangIndex + 1) % languages.length;
+      updateTexts();
+    }
+
+    // ბმულების დაჭერაზე ფუნქციების მიბმა
+    document.getElementById('btnAddRow').onclick = addRow;
+    document.getElementById('btnChangeColors').onclick = changeColors;
+    document.getElementById('btnChangeLang').onclick = changeLanguage;
+
+    // თავდაპირველი რენდერი და ტექსტების განახლება
+    renderTriangle();
+    updateTexts();
+  </script>
+</body>
+</html>
