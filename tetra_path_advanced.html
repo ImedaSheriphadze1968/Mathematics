@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tetra Path Advanced</title>
+  <style>
+    body {
+      background: #222;
+      color: #eee;
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      background: #333;
+      padding: 1rem;
+      font-size: 1.5rem;
+    }
+    #task {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(30px, 40px));
+      grid-gap: 3px;
+      justify-content: center;
+      margin: 1rem auto;
+    }
+    .cell {
+      background: #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 1rem;
+      width: 100%;
+      padding-top: 100%; /* Square */
+      position: relative;
+    }
+    .cell span {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .target { background: #e43f5a; color: #fff; }
+    .player { background: #21e6c1; color: #000; }
+    .block { background: #000; }
+    button {
+      margin: 0.2rem;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      background: #21e6c1;
+      color: #000;
+    }
+    select {
+      padding: 0.4rem;
+      font-size: 1rem;
+      margin: 0.5rem;
+    }
+    #info {
+      margin: 0.5rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 id="title">🎯 Tetra Path Advanced</h1>
+  <div>
+    <select id="langSelect" onchange="changeLanguage()">
+      <option value="en">English</option>
+      <option value="ka">ქართული</option>
+      <option value="ru">Русский</option>
+    </select>
+    <button onclick="generateGrid()" id="newGameBtn">New Game</button>
+  </div>
+  <div id="task"></div>
+  <div id="info"></div>
+  <div>
+    <button onclick="move('up')">⬆</button><br/>
+    <button onclick="move('left')">⬅</button>
+    <button onclick="move('down')">⬇</button>
+    <button onclick="move('right')">➡</button>
+  </div>
+  <div id="grid"></div>
+
+  <script>
+    let rows = 8, cols = 8;
+    let playerPos = { r: 0, c: 0 };
+    let targetPos = { r: 0, c: 0 };
+    let steps = 0;
+    let maxSteps = 20;
+    let lang = 'ka';
+    let blocks = [];
+
+    const texts = {
+      en: {
+        title: "🎯 Tetra Path Advanced",
+        newGame: "New Game",
+        steps: "Steps",
+        outOfSteps: "❗ You are out of steps!",
+        win: s => `🎉 Congratulations! You reached the target in ${s} steps!`,
+        task: "Your task: Move the player 🚶 to reach the target 🎯 avoiding obstacles within 20 steps."
+      },
+      ka: {
+        title: "🎯 მიზნის გზა (დამატებული სირთულე)",
+        newGame: "ახალი თამაში",
+        steps: "ნაბიჯები",
+        outOfSteps: "❗ დასრულდა ნაბიჯების რაოდენობა!",
+        win: s => `🎉 გილოცავთ! მიზანს მიაღწიეთ ${s} ნაბიჯში!`,
+        task: "ამოცანა: გადააადგილეთ მოთამაშე 🚶 ისე, რომ მიაღწიოთ მიზანს 🎯, არ შეეხოთ ბლოკებს და 20 ნაბიჯში მოასწროთ."
+      },
+      ru: {
+        title: "🎯 Путь к цели (сложно)",
+        newGame: "Новая игра",
+        steps: "Шаги",
+        outOfSteps: "❗ Ходы закончились!",
+        win: s => `🎉 Поздравляем! Вы достигли цели за ${s} шагов!`,
+        task: "Задача: передвиньте игрока 🚶 к цели 🎯, избегая блоков, за 20 шагов."
+      }
+    };
+
+    function generateGrid() {
+      steps = 0;
+      playerPos = { r: 0, c: 0 };
+      targetPos = { r: rand(0, rows - 1), c: rand(0, cols - 1) };
+      while (targetPos.r === 0 && targetPos.c === 0) {
+        targetPos = { r: rand(0, rows - 1), c: rand(0, cols - 1) };
+      }
+      generateBlocks();
+      drawGrid();
+      updateInfo();
+      updateTexts();
+    }
+
+    function generateBlocks() {
+      blocks = [];
+      while (blocks.length < 10) {
+        let br = rand(0, rows - 1);
+        let bc = rand(0, cols - 1);
+        let posStr = `${br}-${bc}`;
+        if ((br !== playerPos.r || bc !== playerPos.c) &&
+            (br !== targetPos.r || bc !== targetPos.c) &&
+            !blocks.includes(posStr)) {
+          blocks.push(posStr);
+        }
+      }
+    }
+
+    function drawGrid() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          if (blocks.includes(`${r}-${c}`)) {
+            cell.classList.add("block");
+          } else if (r === targetPos.r && c === targetPos.c) {
+            cell.classList.add("target");
+            cell.innerHTML = "<span>🎯</span>";
+          } else if (r === playerPos.r && c === playerPos.c) {
+            cell.classList.add("player");
+            cell.innerHTML = "<span>🚶</span>";
+          }
+          grid.appendChild(cell);
+        }
+      }
+    }
+
+    function move(dir) {
+      let nr = playerPos.r;
+      let nc = playerPos.c;
+      if (dir === "up") nr--;
+      if (dir === "down") nr++;
+      if (dir === "left") nc--;
+      if (dir === "right") nc++;
+
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+          !blocks.includes(`${nr}-${nc}`)) {
+        playerPos = { r: nr, c: nc };
+        steps++;
+        drawGrid();
+        updateInfo();
+        if (playerPos.r === targetPos.r && playerPos.c === targetPos.c) {
+          setTimeout(() => {
+            alert(texts[lang].win(steps));
+            generateGrid();
+          }, 100);
+        } else if (steps >= maxSteps) {
+          setTimeout(() => {
+            alert(texts[lang].outOfSteps);
+            generateGrid();
+          }, 100);
+        }
+      }
+    }
+
+    function updateInfo() {
+      document.getElementById("info").innerHTML =
+        `${texts[lang].steps}: <strong>${steps}/${maxSteps}</strong>`;
+    }
+
+    function changeLanguage() {
+      lang = document.getElementById("langSelect").value;
+      updateTexts();
+      updateInfo();
+    }
+
+    function updateTexts() {
+      document.getElementById("title").innerText = texts[lang].title;
+      document.getElementById("newGameBtn").innerText = texts[lang].newGame;
+      document.getElementById("task").innerText = texts[lang].task;
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowUp") move("up");
+      if (e.key === "ArrowDown") move("down");
+      if (e.key === "ArrowLeft") move("left");
+      if (e.key === "ArrowRight") move("right");
+    });
+
+    generateGrid();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>იპოვე საიდუმლო უჯრა</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0; padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #333;
+      min-height: 100vh;
+    }
+    #lang-select button {
+      margin: 0 5px;
+      padding: 8px 15px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #lang-select button[aria-pressed="true"] {
+      background-color: #0056b3;
+    }
+    h1 { margin: 10px 0 5px; }
+    #task-desc {
+      max-width: 400px;
+      margin-bottom: 15px;
+    }
+    #startBtn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      max-width: 320px;
+      width: 100%;
+    }
+    .cell {
+      background-color: white;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1 / 1;
+      cursor: pointer;
+    }
+    .cell.found {
+      background-color: #90ee90 !important;
+      border-color: #2ca02c !important;
+      color: #1a3e1a;
+      font-weight: bold;
+    }
+    .cell.missed {
+      background-color: #f9dede !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="lang-select">
+    <button onclick="setLanguage('ka')" aria-pressed="false">ქართული</button>
+    <button onclick="setLanguage('ru')" aria-pressed="false">Русский</button>
+    <button onclick="setLanguage('en')" aria-pressed="true">English</button>
+  </div>
+
+  <h1 id="title">იპოვე საიდუმლო უჯრა</h1>
+
+  <p id="task-desc">დამალული უჯრის პოვნა ბადეზე დაწკაპუნებით შეგიძლიათ. თქვენ გაქვთ 10 მცდელობა. თამაში მოგცემთ მინიშნებებს დაშორების მიხედვით.</p>
+
+  <button id="startBtn">თამაშის დაწყება</button>
+
+  <div id="message"></div>
+
+  <div id="grid"></div>
+
+  <script>
+    const messages = {
+      en: {
+        title: 'Find the Hidden Cell',
+        start: 'Start Game',
+        win: 'You found it in',
+        try: 'tries!',
+        hint: 'Distance',
+        over: 'Game over!',
+        task: 'Find the hidden cell by clicking on the grid. You have 10 tries. The game will give you hints based on distance.',
+        left: 'tries left.'
+      },
+      ka: {
+        title: 'იპოვე საიდუმლო უჯრა',
+        start: 'თამაშის დაწყება',
+        win: 'თქვენ იპოვეთ',
+        try: 'ცდაში!',
+        hint: 'დაშორება',
+        over: 'თამაში დასრულდა!',
+        task: 'დამალული უჯრის პოვნა ბადეზე დაწკაპუნებით შეგიძლიათ. თქვენ გაქვთ 10 მცდელობა. თამაში მოგცემთ მინიშნებებს დაშორების მიხედვით.',
+        left: 'ცდა დარჩა.'
+      },
+      ru: {
+        title: 'Найди скрытую ячейку',
+        start: 'Начать игру',
+        win: 'Вы нашли за',
+        try: 'попыток!',
+        hint: 'Расстояние',
+        over: 'Игра окончена!',
+        task: 'Найдите скрытую ячейку, нажимая на сетку. У вас есть 10 попыток. Игра будет давать подсказки на основе расстояния.',
+        left: 'попыток осталось.'
+      }
+    };
+
+    let lang = 'ka';
+    let targetX, targetY, attemptsLeft, gameActive = false;
+
+    const titleEl = document.getElementById('title');
+    const taskDescEl = document.getElementById('task-desc');
+    const startBtn = document.getElementById('startBtn');
+    const messageEl = document.getElementById('message');
+    const gridEl = document.getElementById('grid');
+
+    function setLanguage(l) {
+      lang = l;
+      document.querySelectorAll('#lang-select button').forEach(btn => {
+        btn.setAttribute('aria-pressed', btn.textContent.includes(l === 'ka' ? 'ქ' : l === 'ru' ? 'Р' : 'E') ? 'true' : 'false');
+      });
+      titleEl.textContent = messages[lang].title;
+      taskDescEl.textContent = messages[lang].task;
+      startBtn.textContent = messages[lang].start;
+      messageEl.textContent = '';
+    }
+
+    function startGame() {
+      attemptsLeft = 10;
+      targetX = Math.floor(Math.random() * 5);
+      targetY = Math.floor(Math.random() * 5);
+      gameActive = true;
+      gridEl.innerHTML = '';
+      messageEl.textContent = '';
+
+      for (let y = 0; y < 5; y++) {
+        for (let x = 0; x < 5; x++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.addEventListener('click', () => handleClick(x, y, cell));
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    function handleClick(x, y, cell) {
+      if (!gameActive || cell.classList.contains('missed') || cell.classList.contains('found')) return;
+
+      if (x === targetX && y === targetY) {
+        cell.classList.add('found');
+        messageEl.textContent = `${messages[lang].win} ${11 - attemptsLeft} ${messages[lang].try}`;
+        gameActive = false;
+      } else {
+        cell.classList.add('missed');
+        attemptsLeft--;
+        if (attemptsLeft === 0) {
+          messageEl.textContent = messages[lang].over;
+          gameActive = false;
+        } else {
+          const dist = Math.abs(x - targetX) + Math.abs(y - targetY);
+          messageEl.textContent = `${messages[lang].hint}: ${dist}. ${attemptsLeft} ${messages[lang].left}`;
+        }
+      }
+    }
+
+    startBtn.addEventListener('click', startGame);
+    setLanguage(lang);
+  </script>
+
+</body>
+</html>

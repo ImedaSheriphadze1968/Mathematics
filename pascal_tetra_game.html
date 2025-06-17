@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grid Move Game</title>
+  <style>
+    body {
+      background: #222;
+      color: #eee;
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      background: #333;
+      padding: 1rem;
+      font-size: 1.5rem;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(8, 40px);
+      grid-gap: 4px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .cell {
+      width: 40px;
+      height: 40px;
+      background: #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .target {
+      background: #e43f5a;
+      color: #fff;
+    }
+    .player {
+      background: #21e6c1;
+      color: #000;
+    }
+    button {
+      margin: 0.3rem;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      background: #21e6c1;
+      color: #000;
+    }
+    #info {
+      margin: 1rem;
+      font-size: 1.2rem;
+    }
+    select {
+      padding: 0.4rem;
+      font-size: 1rem;
+      margin: 0.5rem;
+    }
+    #task {
+      margin: 1rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+      background: #333;
+      border-radius: 4px;
+    }
+    @media (max-width: 500px) {
+      #grid {
+        grid-template-columns: repeat(8, 30px);
+      }
+      .cell {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+      }
+      button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1 id="title">🎯 Grid Move Game</h1>
+  <div>
+    <select id="langSelect" onchange="changeLanguage()">
+      <option value="en">English</option>
+      <option value="ka">ქართული</option>
+      <option value="ru">Русский</option>
+    </select>
+    <button onclick="generateGrid()" id="newGameBtn">New Game</button>
+  </div>
+  <div id="task"></div>
+  <div id="info"></div>
+  <div id="controls">
+    <button onclick="move('up')">⬆</button><br/>
+    <button onclick="move('left')">⬅</button>
+    <button onclick="move('down')">⬇</button>
+    <button onclick="move('right')">➡</button>
+  </div>
+  <div id="grid"></div>
+
+  <script>
+    let rows = 8, cols = 8;
+    let playerPos = { r: 0, c: 0 };
+    let targetPos = { r: 0, c: 0 };
+    let steps = 0;
+    let lang = 'en';
+
+    const texts = {
+      en: {
+        title: "🎯 Grid Move Game",
+        newGame: "New Game",
+        steps: "Steps",
+        task: "Your task: move the 🚶 to the 🎯 using buttons or arrow keys as quickly as possible.",
+        win: steps => `🎉 Congratulations! You reached the target in ${steps} steps!`
+      },
+      ka: {
+        title: "🎯 ბადე თამაში",
+        newGame: "ახალი თამაში",
+        steps: "ნაბიჯები",
+        task: "ამოცანა: გადაადგილეთ 🚶 სიმბოლო 🎯 სიმბოლომდე ღილაკების ან კლავიატურის ისრების გამოყენებით რაც შეიძლება მალე.",
+        win: steps => `🎉 გილოცავთ! მიზანს მიაღწიეთ ${steps} ნაბიჯში!`
+      },
+      ru: {
+        title: "🎯 Игра Сетка",
+        newGame: "Новая игра",
+        steps: "Шаги",
+        task: "Ваша задача: переместите 🚶 к 🎯 с помощью кнопок или стрелок на клавиатуре как можно быстрее.",
+        win: steps => `🎉 Поздравляем! Вы достигли цели за ${steps} шагов!`
+      }
+    };
+
+    function generateGrid() {
+      steps = 0;
+      playerPos = { r: 0, c: 0 };
+      targetPos = {
+        r: Math.floor(Math.random() * rows),
+        c: Math.floor(Math.random() * cols)
+      };
+      if (targetPos.r === 0 && targetPos.c === 0) {
+        targetPos.r = 1;
+        targetPos.c = 1;
+      }
+      drawGrid();
+      updateInfo();
+    }
+
+    function drawGrid() {
+      const gridEl = document.getElementById("grid");
+      gridEl.innerHTML = "";
+      gridEl.style.gridTemplateColumns = `repeat(${cols}, 40px)`;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          if (r === targetPos.r && c === targetPos.c) {
+            cell.classList.add("target");
+            cell.textContent = "🎯";
+          }
+          if (r === playerPos.r && c === playerPos.c) {
+            cell.classList.add("player");
+            cell.textContent = "🚶";
+          }
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    function move(direction) {
+      if (direction === "up" && playerPos.r > 0) playerPos.r--;
+      if (direction === "down" && playerPos.r < rows - 1) playerPos.r++;
+      if (direction === "left" && playerPos.c > 0) playerPos.c--;
+      if (direction === "right" && playerPos.c < cols - 1) playerPos.c++;
+      steps++;
+      drawGrid();
+      updateInfo();
+      checkWin();
+    }
+
+    function updateInfo() {
+      document.getElementById("info").innerHTML = 
+        `${texts[lang].steps}: <strong>${steps}</strong>`;
+    }
+
+    function checkWin() {
+      if (playerPos.r === targetPos.r && playerPos.c === targetPos.c) {
+        setTimeout(() => {
+          alert(texts[lang].win(steps));
+          generateGrid();
+        }, 100);
+      }
+    }
+
+    function changeLanguage() {
+      lang = document.getElementById("langSelect").value;
+      updateLanguageTexts();
+      updateInfo();
+    }
+
+    function updateLanguageTexts() {
+      document.getElementById("title").innerText = texts[lang].title;
+      document.getElementById("newGameBtn").innerText = texts[lang].newGame;
+      document.getElementById("task").innerText = texts[lang].task;
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowUp") move("up");
+      if (e.key === "ArrowDown") move("down");
+      if (e.key === "ArrowLeft") move("left");
+      if (e.key === "ArrowRight") move("right");
+    });
+
+    generateGrid();
+    updateLanguageTexts();
+  </script>
+
+</body>
+</html>
