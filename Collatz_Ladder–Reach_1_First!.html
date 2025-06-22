@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ლოგიკური თამაში | Logical Game | Логическая игра</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: #fff;
+    margin: 0;
+    padding: 0 15px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    margin: 20px 0 10px 0;
+    text-align: center;
+  }
+  h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.8rem;
+  }
+  .lang-select {
+    margin: 10px 0 30px 0;
+  }
+  select {
+    font-size: 1rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+  }
+  #gameRules {
+    max-width: 650px;
+    background: rgba(255 255 255 / 0.15);
+    color: #fff;
+    padding: 20px 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
+  #gameRules h2 {
+    margin-top: 0;
+  }
+  form {
+    background: rgba(255,255,255,0.15);
+    padding: 18px 25px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+  }
+  label {
+    display: block;
+    margin: 15px 0 6px 0;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  input[type=number] {
+    width: 100%;
+    padding: 9px;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  button {
+    margin-top: 22px;
+    width: 100%;
+    background: #ff6f61;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button:hover,
+  button:focus {
+    background: #ff4a3a;
+    outline: none;
+  }
+  canvas {
+    max-width: 100%;
+    height: auto !important;
+    border-radius: 12px;
+    background: #fff;
+    padding: 15px;
+    box-sizing: border-box;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+  footer {
+    margin: 30px 0 10px 0;
+    font-size: 0.85rem;
+    opacity: 0.7;
+    text-align: center;
+  }
+  @media (max-width: 480px) {
+    body {
+      padding: 0 10px;
+    }
+    form {
+      max-width: 100%;
+      padding: 15px 20px;
+    }
+    #gameRules {
+      max-width: 100%;
+      padding: 15px 20px;
+    }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1 id="title">ლოგიკური თამაში</h1>
+    <div class="lang-select">
+      <label for="language" id="langLabel">ენა / Language / Язык:</label>
+      <select id="language" aria-label="Select language">
+        <option value="ka">ქართული</option>
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
+      </select>
+    </div>
+  </header>
+
+  <section id="gameRules" aria-live="polite">
+    <!-- თამაშის პირობა ჩასმული იქნება JS-ით -->
+  </section>
+
+  <form id="gameForm" aria-label="Game input form">
+    <label for="nInput" id="nLabel">აირჩიეთ რიცხვი n</label>
+    <input type="number" id="nInput" name="nInput" min="1" max="1000" step="1" value="5" required />
+
+    <label for="kInput" id="kLabel">აირჩიეთ პარამეტრი k</label>
+    <input type="number" id="kInput" name="kInput" min="1" max="100" step="1" value="3" required />
+
+    <label for="stepInput" id="stepLabel">აირჩიეთ იტერაციების რაოდენობა</label>
+    <input type="number" id="stepInput" name="stepInput" min="1" max="100" step="1" value="15" required />
+
+    <button type="submit" id="startBtn">დაწყება</button>
+  </form>
+
+  <canvas id="chart" role="img" aria-label="Graph of sequence values"></canvas>
+
+  <footer>
+    Created by Imeda Sheriphadze – Neural Architect & AI Visioneer
+  </footer>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    // ტექსტები 3 ენაზე
+    const texts = {
+      ka: {
+        title: "ლოგიკური თამაში",
+        langLabel: "ენა / Language / Язык:",
+        nLabel: "აირჩიეთ რიცხვი n",
+        kLabel: "აირჩიეთ პარამეტრი k",
+        stepLabel: "აირჩიეთ იტერაციების რაოდენობა",
+        startBtn: "დაწყება",
+        error: "გთხოვთ შეიყვანოთ სწორი მნიშვნელობები!"
+      },
+      en: {
+        title: "Logical Game",
+        langLabel: "Language / ენა / Язык:",
+        nLabel: "Choose number n",
+        kLabel: "Choose parameter k",
+        stepLabel: "Choose number of iterations",
+        startBtn: "Start",
+        error: "Please enter valid values!"
+      },
+      ru: {
+        title: "Логическая игра",
+        langLabel: "Язык / Language / ენა:",
+        nLabel: "Выберите число n",
+        kLabel: "Выберите параметр k",
+        stepLabel: "Выберите количество итераций",
+        startBtn: "Начать",
+        error: "Пожалуйста, введите корректные значения!"
+      }
+    };
+
+    // თამაშის პირობა 3 ენაზე
+    const gameRulesTexts = {
+      ka: `
+        <h2>თამაშის პირობა</h2>
+        <p>ეს ლოგიკური თამაში შექმნილია ჩემი სადისერტაციო ნაშრომის ალგორითმის საფუძველზე, რომელიც ეძღვნება რიცხვებით სერიების გამოკვლევას და მათ მახასიათებლებს.</p>
+        <p>მოთამაშეს ევალება აირჩიოს სამი ძირითადი პარამეტრი — საწყისი რიცხვი <b>n</b>, კონტროლის ფაქტორი <b>k</b> და იტერაციების რაოდენობა — დააკვირდით, როგორ იცვლება რიცხვთა სერია ამ პარამეტრებთან შესაბამისობაში.</p>
+        <p>ყოველი ნაბიჯი გამოთვლილია მათემატიკური მოდელის მიხედვით, რაც საშუალებას გაძლევთ შეისწავლოთ სერიის ქცევა და გრაფიკულად აღიქვათ მისი განვითარების ტრაექტორია.</p>
+        <p>ეს თამაში არ არის მხოლოდ, არამედ ის აგროვებს ღირებული ცოდნას რიცხვობრივი სისტემების დინამიკის შესახებ.</p>
+        <p>მიიღეთ მონაწილეობა, აირჩიეთ პარამეტრები და გახდით თქვენ ამ სადისერტაციო ნაშრომის ექსპერტი პრაქტიკაში!</p>
+        <div style="text-align:center; margin-top: 15px;">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff6f61" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 2a15 15 0 0 1 4 7 15 15 0 0 1-8 0 15 15 0 0 1 4-7z" />
+            <path d="M12 22a15 15 0 0 1 4-7 15 15 0 0 1-8 0 15 15 0 0 1 4 7z" />
+            <line x1="12" y1="12" x2="12" y2="22" />
+          </svg>
+        </div>
+      `,
+      en: `
+        <h2>Game Rule</h2>
+        <p>This logical game is based on the algorithm developed in my dissertation, which is dedicated to the exploration of numerical sequences and their characteristics.</p>
+        <p>The player is expected to select three key parameters — the initial number <b>n</b>, the control factor <b>k</b>, and the number of iterations — and observe how the sequence changes in accordance with these parameters.</p>
+        <p>Each step is calculated using a mathematical model, allowing you to study the behavior of the sequence and visually perceive its developmental trajectory.</p>
+        <p>This game is not merely for entertainment — it provides valuable insight into the dynamics of numeric systems.</p>
+        <p>Get involved, choose your parameters, and become a practical expert in the core principles of this dissertation!</p>
+        <div style="text-align:center; margin-top: 15px;">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff6f61" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 2a15 15 0 0 1 4 7 15 15 0 0 1-8 0 15 15 0 0 1 4-7z" />
+            <path d="M12 22a15 15 0 0 1 4-7 15 15 0 0 1-8 0 15 15 0 0 1 4 7z" />
+            <line x1="12" y1="12" x2="12" y2="22" />
+          </svg>
+        </div>
+      `,
+      ru: `
+        <h2>Правила игры</h2>
+        <p>Эта логическая игра основана на алгоритме, разработанном в моей диссертационной работе, посвящённой исследованию числовых последовательностей и их характеристик.</p>
+        <p>Игроку предлагается выбрать три ключевых параметра — начальное число <b>n</b>, коэффициент управления <b>k</b> и количество итераций — и проследить, как меняется последовательность в зависимости от этих значений.</p>
+        <p>Каждый шаг рассчитывается по математической модели, что позволяет изучать поведение последовательности и визуально воспринимать её траекторию развития.</p>
+        <p>Эта игра — не просто развлечение, а инструмент для получения ценных знаний о динамике числовых систем.</p>
+        <p>Примите участие, выберите параметры и станьте практическим экспертом в фундаментальных идеях данной диссертации!</p>
+        <div style="text-align:center; margin-top: 15px;">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff6f61" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 2a15 15 0 0 1 4 7 15 15 0 0 1-8 0 15 15 0 0 1 4-7z" />
+            <path d="M12 22a15 15 0 0 1 4-7 15 15 0 0 1-8 0 15 15 0 0 1 4 7z" />
+            <line x1="12" y1="12" x2="12" y2="22" />
+          </svg>
+        </div>
+      `
+    };
+
+    // ელემენტების მიბმა
+    const languageSelect = document.getElementById("language");
+    const titleEl = document.getElementById("title");
+    const langLabelEl = document.getElementById("langLabel");
+    const nLabelEl = document.getElementById("nLabel");
+    const kLabelEl = document.getElementById("kLabel");
+    const stepLabelEl = document.getElementById("stepLabel");
+    const startBtnEl = document.getElementById("startBtn");
+    const form = document.getElementById("gameForm");
+    const ctx = document.getElementById("chart").getContext("2d");
+    const gameRulesEl = document.getElementById('gameRules');
+
+    let chart;
+
+    function updateLanguage(lang) {
+      titleEl.textContent = texts[lang].title;
+      langLabelEl.textContent = texts[lang].langLabel;
+      nLabelEl.textContent = texts[lang].nLabel;
+      kLabelEl.textContent = texts[lang].kLabel;
+      stepLabelEl.textContent = texts[lang].stepLabel;
+      startBtnEl.textContent = texts[lang].startBtn;
+
+      gameRulesEl.innerHTML = gameRulesTexts[lang];
+    }
+
+    // ენის შეცვლა
+    languageSelect.addEventListener("change", () => {
+      updateLanguage(languageSelect.value);
+    });
+
+    // საწყისი ენის დაყენება
+    updateLanguage(languageSelect.value);
+
+    // სადისერტაციო ნაშრომის ალგორითმის მაგალითი:
+    // აქ არის თქვენი ლოგიკა, შეგიძლიათ დაარედაქტიროთ თქვენი მოდელის შესაბამისად
+    function computeSequence(n, k, steps) {
+      let results = [n];
+      for(let i = 1; i <= steps; i++) {
+        let prev = results[i-1];
+        // მაგალითი ალგორითმი (შეგიძლიათ შეცვალოთ)
+        let next = (k * prev + n) % (n + k + 1);
+        results.push(next);
+      }
+      return results;
+    }
+
+    // ფორმის დამუშავება და გრაფიკის ნახაზი
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      let n = parseInt(document.getElementById("nInput").value);
+      let k = parseInt(document.getElementById("kInput").value);
+      let steps = parseInt(document.getElementById("stepInput").value);
+
+      if(isNaN(n) || isNaN(k) || isNaN(steps) || n < 1 || k < 1 || steps < 1) {
+        alert(texts[languageSelect.value].error);
+        return;
+      }
+
+      let seq = computeSequence(n, k, steps);
+      let labels = [];
+      for(let i=0; i<=steps; i++) {
+        labels.push(i);
+      }
+
+      if(chart) {
+        chart.destroy();
+      }
+
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: texts[languageSelect.value].title,
+            data: seq,
+            borderColor: '#ff6f61',
+            backgroundColor: 'rgba(255,111,97,0.4)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 5,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#ff6f61',
+            borderWidth: 3,
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: '#fff',
+                font: {
+                  size: 14,
+                  weight: 'bold'
+                }
+              },
+              grid: {
+                color: 'rgba(255,255,255,0.2)'
+              }
+            },
+            x: {
+              ticks: {
+                color: '#fff',
+                font: {
+                  size: 14,
+                  weight: 'bold'
+                }
+              },
+              grid: {
+                color: 'rgba(255,255,255,0.2)'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#fff',
+                font: {
+                  size: 16,
+                  weight: 'bold'
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: '#ff6f61',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              displayColors: false
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
