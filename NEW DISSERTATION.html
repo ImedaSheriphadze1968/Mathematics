@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imeda Algorithm Visualizer</title>
+  <style>
+    :root {
+      --main-bg: #f5f8fc;
+      --panel-bg: #ffffff;
+      --accent: #0077cc;
+      --text: #333333;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--main-bg);
+      color: var(--text);
+    }
+    header {
+      background-color: var(--accent);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    .controls {
+      margin: 20px 0;
+      text-align: center;
+    }
+    input, button, select {
+      font-size: 1rem;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: var(--accent);
+      color: white;
+      cursor: pointer;
+    }
+    .stage {
+      background-color: var(--panel-bg);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    .highlight {
+      background-color: #d0f0ff;
+      padding: 3px 6px;
+      border-radius: 4px;
+    }
+    .carry {
+      color: red;
+      font-weight: bold;
+    }
+    .final {
+      background-color: #e0ffe0;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    @media (max-width: 600px) {
+      main { padding: 10px; }
+      input, button, select { width: 90%; margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="title">🔢 Imeda's Carry-Based Algorithm Visualizer</h1>
+    <select id="language" onchange="changeLanguage()">
+      <option value="en">English</option>
+      <option value="ka">ქართული</option>
+      <option value="ru">Русский</option>
+    </select>
+  </header>
+
+  <main>
+    <div id="description"></div>
+
+    <div class="controls">
+      <input type="text" id="numberInput" placeholder="Enter a number" />
+      <button onclick="startAlgorithm()">Start</button>
+    </div>
+
+    <div id="output" class="stage"></div>
+  </main>
+
+  <script>
+    const translations = {
+      en: {
+        title: "🔢 Imeda's Carry-Based Algorithm Visualizer",
+        desc: "This visual tool demonstrates how a custom multiplication algorithm works when a number is multiplied by the same-length string of 1's (e.g. 234 × 111, 567234 × 111111). Follow each step: digit breakdown, sum formation, carry propagation and final construction.",
+        placeholder: "Enter a number",
+        start: "Start",
+        steps: {
+          digits: "Input Digits",
+          sumHeader: "📌 Step 1: Build Sums List",
+          carryHeader: "🔁 Step 2: Carry Propagation",
+          finalHeader: "🎯 Final Step: Result",
+          finalNumber: "Constructed Number:",
+          actual: "Actual Multiplication:",
+          match: "Match"
+        }
+      },
+      ka: {
+        title: "🔢 იმედას ალგორითმის ვიზუალური დემონსტრაცია",
+        desc: "ეს ინსტრუმენტი აჩვენებს, როგორ მუშაობს სპეციალური გამრავლების ალგორითმი, როცა რიცხვი მრავლდება შესაბამისი სიგრძის ერთიანების მიმდევრობაზე (მაგ. 234 × 111, 567234 × 111111). იხილეთ თითოეული ნაბიჯი: ციფრების დაშლა, ჯამების შექმნა, გადატანების დინამიკა და საბოლოო რიცხვის აგება.",
+        placeholder: "შეიყვანეთ რიცხვი",
+        start: "დაწყება",
+        steps: {
+          digits: "შეყვანილი ციფრები",
+          sumHeader: "📌 ნაბიჯი 1: ჯამების შექმნა",
+          carryHeader: "🔁 ნაბიჯი 2: გადატანების პროცესი",
+          finalHeader: "🎯 ნაბიჯი 3: საბოლოო შედეგი",
+          finalNumber: "აგებული რიცხვი:",
+          actual: "რეალური გამრავლება:",
+          match: "შედარება"
+        }
+      },
+      ru: {
+        title: "🔢 Визуализация алгоритма Имеды",
+        desc: "Этот инструмент демонстрирует, как работает специальный алгоритм умножения, когда число умножается на последовательность единиц той же длины (например, 234 × 111, 567234 × 111111). Следуйте каждому шагу: разложение цифр, формирование сумм, переносы и построение результата.",
+        placeholder: "Введите число",
+        start: "Начать",
+        steps: {
+          digits: "Введенные цифры",
+          sumHeader: "📌 Шаг 1: Формирование сумм",
+          carryHeader: "🔁 Шаг 2: Переносы",
+          finalHeader: "🎯 Шаг 3: Финальный результат",
+          finalNumber: "Построенное число:",
+          actual: "Фактическое умножение:",
+          match: "Совпадение"
+        }
+      }
+    };
+
+    let currentLang = 'en';
+
+    function changeLanguage() {
+      currentLang = document.getElementById('language').value;
+      const t = translations[currentLang];
+      document.getElementById('title').innerText = t.title;
+      document.getElementById('description').innerText = t.desc;
+      document.getElementById('numberInput').placeholder = t.placeholder;
+      document.querySelector("button").innerText = t.start;
+      document.getElementById("output").innerHTML = "";
+    }
+
+    function startAlgorithm() {
+      const numStr = document.getElementById("numberInput").value.trim();
+      const t = translations[currentLang].steps;
+      if (!/^\d+$/.test(numStr)) {
+        alert("Invalid number");
+        return;
+      }
+      const digits = numStr.split('').map(Number);
+      const n = digits.length;
+      const output = document.getElementById("output");
+      output.innerHTML = `<h3>${t.digits}</h3><p>${digits.join(', ')}</p>`;
+
+      let sums = [];
+      output.innerHTML += `<h3>${t.sumHeader}</h3>`;
+      for (let k = 1; k <= n; k++) {
+        let slice = digits.slice(0, k);
+        let s = slice.reduce((a,b)=>a+b, 0);
+        sums.push(s);
+        output.innerHTML += `<p>s<sub>${k}</sub> = ${slice.join('+')} = <span class='highlight'>${s}</span></p>`;
+      }
+      for (let k = 1; k < n; k++) {
+        let slice = digits.slice(k);
+        let s = slice.reduce((a,b)=>a+b, 0);
+        sums.push(s);
+        output.innerHTML += `<p>s<sub>${n + k}</sub> = ${slice.join('+')} = <span class='highlight'>${s}</span></p>`;
+      }
+
+      output.innerHTML += `<h3>${t.carryHeader}</h3>`;
+      let result = new Array(sums.length).fill(0);
+      let carry = 0;
+      for (let i = sums.length - 1; i >= 0; i--) {
+        let total = sums[i] + carry;
+        result[i] = total % 10;
+        let newCarry = Math.floor(total / 10);
+        output.innerHTML += `<p>s[${i+1}] + carry(${carry}) = ${total} → digit = <span class='highlight'>${result[i]}</span>, <span class='carry'>carry = ${newCarry}</span></p>`;
+        carry = newCarry;
+      }
+
+      const finalNumber = result.join('');
+      const actual = BigInt(numStr) * BigInt('1'.repeat(n));
+
+      output.innerHTML += `<h3>${t.finalHeader}</h3>`;
+      output.innerHTML += `<div class='final'>${t.finalNumber} ${finalNumber}</div>`;
+      output.innerHTML += `<p>${t.actual} ${numStr} × ${'1'.repeat(n)} = ${actual}</p>`;
+      output.innerHTML += `<p>${t.match}: ${finalNumber === actual.toString() ? '✅ YES' : '❌ NO'}</p>`;
+    }
+
+    window.onload = changeLanguage;
+  </script>
+</body>
+</html>
