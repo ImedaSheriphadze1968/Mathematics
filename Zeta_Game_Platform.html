@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZetaMind – ინტელექტუალური თამაში</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #1a1a40, #0e153a);
+      color: white;
+      overflow: hidden;
+    }
+    header {
+      padding: 20px;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.3);
+      font-size: 24px;
+      font-weight: bold;
+      border-bottom: 2px solid #4fc3f7;
+    }
+    #description {
+      text-align: center;
+      padding: 10px;
+      font-size: 18px;
+      max-width: 1000px;
+      margin: auto;
+      color: #c0eaff;
+    }
+    #canvas-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 60vh;
+    }
+    canvas {
+      background-color: #101828;
+      border: 2px solid #4fc3f7;
+      border-radius: 10px;
+    }
+    #controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .control {
+      background-color: #16213e;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #lang {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #222f3e;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: #89caff;
+    }
+  </style>
+</head>
+<body>
+  <div id="lang">
+    <select onchange="switchLang(this.value)">
+      <option value="en">English</option>
+      <option value="ka">ქართული</option>
+      <option value="ru">Русский</option>
+    </select>
+  </div>
+
+  <header id="title">🎯 ZetaMind – Real-Time ζ(s + k) Explorer</header>
+
+  <div id="description">
+    📘 <span id="task-text">Your mission: Explore the modified Riemann zeta function ζ(s + k) in real-time by adjusting parameters and observing graph behavior. Try to discover invisible symmetries and hidden minimums!</span>
+  </div>
+
+  <div id="canvas-container">
+    <canvas id="zetaCanvas" width="1000" height="400"></canvas>
+  </div>
+
+  <div id="controls">
+    <label style="color:#fff;">k = <input class="control" type="range" id="kSlider" min="1" max="30" value="10"></label>
+    <label style="color:#fff;">tₘₐₓ = <input class="control" type="range" id="tSlider" min="10" max="100" value="40"></label>
+  </div>
+
+  <footer>
+    Created by <strong>Imeda Sherifadze</strong> – Neural Architect & AI Visioneer  📞 +995(555) 45-92-70 | ✉️ isheriphadze@gmail.com | 📲 Telegram: @NeuroFusionHub
+  </footer>
+
+  <script>
+    const canvas = document.getElementById("zetaCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let lang = "en";
+    const texts = {
+      en: {
+        title: "🎯 ZetaMind – Real-Time ζ(s + k) Explorer",
+        task: "Your mission: Explore the modified Riemann zeta function ζ(s + k) in real-time by adjusting parameters and observing graph behavior. Try to discover invisible symmetries and hidden minimums!"
+      },
+      ka: {
+        title: "🎯 ZetaMind – ζ(s + k) რეალურ დროში",
+        task: "Შენი ამოცანაა: დაკვირდი მოდიფიცირებულ ძეტა-ფუნქციას ζ(s + k) რეალურ დროში, შეცვალე პარამეტრები და აღმოაჩინე დამალული სიმეტრიები და მინიმუმები!"
+      },
+      ru: {
+        title: "🎯 ZetaMind – ζ(s + k) в реальном времени",
+        task: "Твоя задача: исследуй модифицированную дзета-функцию ζ(s + k) в реальном времени, изменяя параметры и наблюдая за графиком. Отыщи скрытые симметрии и минимумы!"
+      }
+    };
+
+    function switchLang(code) {
+      lang = code;
+      document.getElementById("title").innerText = texts[lang].title;
+      document.getElementById("task-text").innerText = texts[lang].task;
+    }
+
+    const kSlider = document.getElementById("kSlider");
+    const tSlider = document.getElementById("tSlider");
+
+    function zetaReal(k, t) {
+      // Simulated zeta-like behavior for demonstration
+      return Math.exp(-0.01 * (t - 14.1)**2) * Math.cos(k * 0.1 * t);
+    }
+
+    function drawGraph() {
+      const k = parseInt(kSlider.value);
+      const tMax = parseInt(tSlider.value);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      for (let x = 0; x < canvas.width; x++) {
+        const t = (x / canvas.width) * (2 * tMax) - tMax;
+        const y = zetaReal(k, t);
+        const yPixel = canvas.height / 2 - y * 150;
+        ctx.lineTo(x, yPixel);
+      }
+      ctx.strokeStyle = "#00d4ff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    kSlider.addEventListener("input", drawGraph);
+    tSlider.addEventListener("input", drawGraph);
+
+    drawGraph();
+  </script>
+</body>
+</html>
