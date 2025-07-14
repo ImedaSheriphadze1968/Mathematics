@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <title>უსასრულო სერიების ანიმაცია</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #f8fafc, #e2e8f0);
+      color: #1f2937;
+      padding: 2rem;
+      margin: 0;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .lang-switcher button {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      margin: 0 0.25rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .lang-switcher button.active {
+      background: #2563eb;
+    }
+    h1, h2 {
+      color: #1e3a8a;
+    }
+    canvas {
+      background: #e0f2fe;
+      border: 1px solid #94a3b8;
+      border-radius: 8px;
+      display: block;
+      margin: 1rem 0;
+    }
+    .section {
+      margin-bottom: 3rem;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #475569;
+      border-top: 1px solid #cbd5e1;
+      padding-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="title">🔁 უსასრულო სერიების ანიმაცია</h1>
+    <div class="lang-switcher">
+      <button onclick="setLang('ka')" class="active">ქართული</button>
+      <button onclick="setLang('en')">English</button>
+      <button onclick="setLang('ru')">Русский</button>
+    </div>
+  </header>
+
+  <div class="section">
+    <h2 id="convergeTitle">1. კონვერგენტული სერია: 1/2 + 1/4 + 1/8 + ... → 1</h2>
+    <p id="convergeText">ყოველი წევრი იკავებს დარჩენილი სივრცის ნახევარს. საბოლოოდ სერია უახლოვდება ერთიან სიგრძეს.</p>
+    <canvas id="convergeCanvas" width="600" height="60"></canvas>
+  </div>
+
+  <div class="section">
+    <h2 id="divergeTitle">2. დივერგენტული სერია: 1 + 2 + 4 + 8 + ... → ♾️ (ან −1)</h2>
+    <p id="divergeText">ჯამი უსასრულოდ იზრდება — თუმცა Ramanujan-ის მიხედვით, ფორმალურად შეიძლება მიენიჭოს მნიშვნელობა −1.</p>
+    <canvas id="divergeCanvas" width="600" height="120"></canvas>
+  </div>
+
+  <footer>
+    Created by <strong>Imeda Sherifadze</strong> – Neural Architect & AI Visioneer<br>
+    📞 +995(555) 45-92-70 | ✉️ isherifadze@gmail.com | 📲 Telegram: @NeuroFusionHub
+  </footer>
+
+  <script>
+    let lang = 'ka';
+    const translations = {
+      ka: {
+        title: '🔁 უსასრულო სერიების ანიმაცია',
+        convergeTitle: '1. კონვერგენტული სერია: 1/2 + 1/4 + 1/8 + ... → 1',
+        convergeText: 'ყოველი წევრი იკავებს დარჩენილი სივრცის ნახევარს. საბოლოოდ სერია უახლოვდება ერთიან სიგრძეს.',
+        divergeTitle: '2. დივერგენტული სერია: 1 + 2 + 4 + 8 + ... → ♾️ (ან −1)',
+        divergeText: 'ჯამი უსასრულოდ იზრდება — თუმცა Ramanujan-ის მიხედვით, ფორმალურად შეიძლება მიენიჭოს მნიშვნელობა −1.'
+      },
+      en: {
+        title: '🔁 Infinite Series Animation',
+        convergeTitle: '1. Convergent Series: 1/2 + 1/4 + 1/8 + ... → 1',
+        convergeText: 'Each term takes half of the remaining space. Eventually, the series approaches 1.',
+        divergeTitle: '2. Divergent Series: 1 + 2 + 4 + 8 + ... → ∞ (or −1)',
+        divergeText: 'The sum grows infinitely — but formally, via Ramanujan summation, it may be assigned the value −1.'
+      },
+      ru: {
+        title: '🔁 Анимация бесконечных рядов',
+        convergeTitle: '1. Сходящийся ряд: 1/2 + 1/4 + 1/8 + ... → 1',
+        convergeText: 'Каждый член занимает половину оставшегося пространства. В итоге сумма стремится к 1.',
+        divergeTitle: '2. Расходящийся ряд: 1 + 2 + 4 + 8 + ... → ∞ (или −1)',
+        divergeText: 'Сумма растет бесконечно — но формально, по Рамануджанy, ей можно приписать значение −1.'
+      }
+    };
+
+    function setLang(l) {
+      lang = l;
+      document.querySelectorAll('.lang-switcher button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      const t = translations[lang];
+      document.getElementById('title').textContent = t.title;
+      document.getElementById('convergeTitle').textContent = t.convergeTitle;
+      document.getElementById('convergeText').textContent = t.convergeText;
+      document.getElementById('divergeTitle').textContent = t.divergeTitle;
+      document.getElementById('divergeText').textContent = t.divergeText;
+    }
+
+    const convCanvas = document.getElementById('convergeCanvas');
+    const convCtx = convCanvas.getContext('2d');
+    let convFrame = 0;
+    function animateConverge() {
+      convCtx.clearRect(0, 0, convCanvas.width, convCanvas.height);
+      let term = 1 / 2;
+      let total = 0, x = 0;
+      convCtx.fillStyle = '#38bdf8';
+      for (let i = 0; i < convFrame; i++) {
+        const width = convCanvas.width * term;
+        convCtx.fillRect(x, 20, width, 20);
+        x += width;
+        total += term;
+        term /= 2;
+      }
+      convCtx.fillStyle = '#1e3a8a';
+      convCtx.fillText('ჯამი: ' + total.toFixed(6), 10, 55);
+      convFrame++;
+      if (total >= 1) convFrame = 0;
+      setTimeout(animateConverge, 800); // შეანელე
+    }
+
+    const divCanvas = document.getElementById('divergeCanvas');
+    const divCtx = divCanvas.getContext('2d');
+    let divFrame = 0;
+    function animateDiverge() {
+      divCtx.clearRect(0, 0, divCanvas.width, divCanvas.height);
+      let sum = 0, term = 1, x = 10;
+      divCtx.fillStyle = '#f97316';
+      for (let i = 0; i < divFrame; i++) {
+        let height = Math.min(term * 5, 90);
+        divCtx.fillRect(x, 100 - height, 20, height);
+        sum += term;
+        term *= 2;
+        x += 25;
+      }
+      divCtx.fillStyle = '#7c3aed';
+      divCtx.fillText(`ფორმალურად: −1 | ფაქტობრივი ჯამი: ${sum}`, 10, 115);
+      divFrame++;
+      if (sum >= 4095) divFrame = 0;
+      setTimeout(animateDiverge, 1000); // შეანელე
+    }
+
+    animateConverge();
+    animateDiverge();
+  </script>
+</body>
+</html>
