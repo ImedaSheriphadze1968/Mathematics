@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ინტელექტუალური თამაში – გეომეტრიის პარადოქსები</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #2c3e50;
+      color: white;
+      text-align: center;
+      padding: 1.2em;
+      font-size: 1.6em;
+      position: relative;
+      user-select: none;
+    }
+    /* ტექსტი სათაურის გარდა, რომ დააკონტროლოთ ცალკე */
+    #page-title-text {
+      display: inline-block;
+    }
+    .lang-switcher {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+    }
+    .lang-switcher button {
+      margin: 0 4px;
+      padding: 0.4em 0.8em;
+      background-color: #2980b9;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+    .lang-switcher button:hover {
+      background-color: #3498db;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      padding: 2em 1em;
+    }
+    .panel {
+      background: white;
+      padding: 1.5em;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .panel h3 {
+      margin-bottom: 0.5em;
+      color: #2c3e50;
+      user-select: none;
+    }
+    .panel p {
+      font-size: 0.95em;
+      color: #333;
+      text-align: center;
+      margin-bottom: 1em;
+      user-select: none;
+    }
+    canvas {
+      background: #fff;
+      border: 2px solid #2c3e50;
+      border-radius: 10px;
+    }
+    footer {
+      text-align: center;
+      margin: 40px 0 20px;
+      font-size: 0.9em;
+      color: #666;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span id="page-title-text">ინტელექტუალური თამაში – გეომეტრიის პარადოქსები</span>
+    <div class="lang-switcher">
+      <button onclick="setLang('ka')">KA</button>
+      <button onclick="setLang('en')">EN</button>
+      <button onclick="setLang('ru')">RU</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="panel">
+      <h3 id="flat-title">ღია სიბრტყე – პარალელური ხაზების უქმკვეთობა</h3>
+      <p id="flat-desc">
+        მოცემულია ორი წერტილი, რომლებიც მოძრაობენ პარალელურად ღია სიბრტყეზე. ისინი არასდროს იკვეთებიან, რაც შეესაბამება ევკლიდურ გეომეტრიას. თუმცა მოდულარული სივრცის გამოყენებით მათ შეუძლიათ ერთ წერტილში ხვედრა.
+      </p>
+      <canvas id="flatCanvas" width="400" height="300"></canvas>
+    </div>
+
+    <div class="panel">
+      <h3 id="globe-title">დახურული გლობუსი – მერიდიანებიდან პოლუსამდე</h3>
+      <p id="globe-desc">
+        ორი წერტილი იწყებს მოძრაობას გლობუსის სხვადასხვა გრძედიდან და თანაბარი სიჩქარით მიემართება ჩრდილოეთ პოლუსისკენ. საბოლოოდ ისინი ხვდებიან ერთ წერტილში – პოლუსზე, რაც წარმოადგენს დახურული სივრცის კლასიკურ მაგალითს.
+      </p>
+      <canvas id="globeCanvas" width="400" height="300"></canvas>
+    </div>
+  </div>
+
+  <footer>
+    Created by Imeda Sherifadze – Neural Architect & AI Visioneer<br />
+    📞 +995(555) 45-92-70 | ✉️ isheriphadze@gmail.com | 📲 Telegram: @NeuroFusionHub
+  </footer>
+
+  <script>
+    const translations = {
+      ka: {
+        pageTitle: "ინტელექტუალური თამაში – გეომეტრიის პარადოქსები",
+        flatTitle: "ღია სიბრტყე – პარალელური ხაზების უქმკვეთობა",
+        flatDesc:
+          "მოცემულია ორი წერტილი, რომლებიც მოძრაობენ პარალელურად ღია სიბრტყეზე. ისინი არასდროს იკვეთებიან, რაც შეესაბამება ევკლიდურ გეომეტრიას. თუმცა მოდულარული სივრცის გამოყენებით მათ შეუძლიათ ერთ წერტილში ხვედრა.",
+        globeTitle: "დახურული გლობუსი – მერიდიანებიდან პოლუსამდე",
+        globeDesc:
+          "ორი წერტილი იწყებს მოძრაობას გლობუსის სხვადასხვა გრძედიდან და თანაბარი სიჩქარით მიემართება ჩრდილოეთ პოლუსისკენ. საბოლოოდ ისინი ხვდებიან ერთ წერტილში – პოლუსზე, რაც წარმოადგენს დახურული სივრცის კლასიკურ მაგალითს."
+      },
+      en: {
+        pageTitle: "Intelligent Game – Geometric Paradoxes",
+        flatTitle: "Open Plane – Non-Intersection of Parallel Lines",
+        flatDesc:
+          "Two points move in parallel on an open plane. They never intersect, in accordance with Euclidean geometry. However, using modular space, they can meet at a single point.",
+        globeTitle: "Closed Globe – From Meridians to the Pole",
+        globeDesc:
+          "Two points start moving from different longitudes of the globe, heading toward the North Pole at equal speed. Eventually, they meet at a single point – the pole, representing a closed space model."
+      },
+      ru: {
+        pageTitle: "Интеллектуальная игра – Геометрические парадоксы",
+        flatTitle: "Открытая плоскость – Не пересекающиеся параллельные линии",
+        flatDesc:
+          "Две точки движутся параллельно на открытой плоскости. Они никогда не пересекаются, что соответствует евклидовой геометрии. Однако в модульном пространстве они могут встретиться в одной точке.",
+        globeTitle: "Замкнутый глобус – От меридианов к полюсу",
+        globeDesc:
+          "Две точки стартуют с разных долгот глобуса и движутся к Северному полюсу с одинаковой скоростью. В итоге они встречаются в одной точке – у полюса, что является примером замкнутого пространства."
+      }
+    };
+
+    function setLang(lang) {
+      // ტექსტის ცალკე შეცვლა, რომ არ წაიშალოს გადამრთველები
+      document.getElementById("page-title-text").innerText =
+        translations[lang].pageTitle;
+      document.getElementById("flat-title").innerText = translations[lang].flatTitle;
+      document.getElementById("flat-desc").innerText = translations[lang].flatDesc;
+      document.getElementById("globe-title").innerText = translations[lang].globeTitle;
+      document.getElementById("globe-desc").innerText = translations[lang].globeDesc;
+    }
+
+    // ღია სიბრტყე
+    const flatCanvas = document.getElementById("flatCanvas");
+    const fctx = flatCanvas.getContext("2d");
+    let A = { x: 20, y: 80, vx: 2 };
+    let B = { x: 20, y: 220, vx: 2 };
+    let trailA = [],
+      trailB = [],
+      collided = false;
+
+    function drawFlat() {
+      fctx.clearRect(0, 0, flatCanvas.width, flatCanvas.height);
+      trailA.push({ x: A.x, y: A.y });
+      trailB.push({ x: B.x, y: B.y });
+
+      drawTrail(fctx, trailA, "blue");
+      drawTrail(fctx, trailB, "red");
+      drawPoint(fctx, A, "blue");
+      drawPoint(fctx, B, "red");
+
+      A.x = (A.x + A.vx) % flatCanvas.width;
+      B.x = (B.x + B.vx) % flatCanvas.width;
+
+      requestAnimationFrame(drawFlat);
+    }
+
+    // გლობუსი – მერიდიანებიდან პოლუსამდე
+    const globeCanvas = document.getElementById("globeCanvas");
+    const gctx = globeCanvas.getContext("2d");
+    const centerX = 200,
+      centerY = 280,
+      radius = 100;
+    let latA = Math.PI / 2 - 0.01;
+    let latB = Math.PI / 2 - 0.01;
+    const lonA = Math.PI / 4;
+    const lonB = (3 * Math.PI) / 4;
+
+    function drawGlobe() {
+      gctx.clearRect(0, 0, globeCanvas.width, globeCanvas.height);
+      gctx.beginPath();
+      gctx.arc(centerX, centerY, radius, 0, Math.PI, true);
+      gctx.strokeStyle = "#bbb";
+      gctx.stroke();
+
+      const pointA = {
+        x: centerX + radius * Math.cos(lonA) * Math.sin(latA),
+        y: centerY - radius * Math.cos(latA)
+      };
+      const pointB = {
+        x: centerX + radius * Math.cos(lonB) * Math.sin(latB),
+        y: centerY - radius * Math.cos(latB)
+      };
+
+      drawPoint(gctx, pointA, "blue");
+      drawPoint(gctx, pointB, "red");
+
+      if (Math.abs(pointA.y - pointB.y) < 2 && Math.abs(pointA.x - pointB.x) < 4) {
+        drawCollision(gctx, pointA.x, pointA.y);
+
+        // თავიდან ვუბრუნდებით საწყისს და მოძრაობა გრძელდება უწყვეტად
+        latA = Math.PI / 2 - 0.01;
+        latB = Math.PI / 2 - 0.01;
+
+        // ველოდოთ ცოტა და გავაგრძელოთ
+        setTimeout(() => {
+          requestAnimationFrame(drawGlobe);
+        }, 1000); // 1 წამი გაჩერება, თუ არ გინდა, დააწესე 0 ან წაშალე setTimeout
+      } else {
+        latA -= 0.005;
+        latB -= 0.005;
+        requestAnimationFrame(drawGlobe);
+      }
+    }
+
+    function drawPoint(ctx, pt, color) {
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+
+    function drawTrail(ctx, trail, color) {
+      if (trail.length < 2) return;
+      ctx.beginPath();
+      ctx.moveTo(trail[0].x, trail[0].y);
+      for (let i = 1; i < trail.length; i++) {
+        ctx.lineTo(trail[i].x, trail[i].y);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    function drawCollision(ctx, x, y) {
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, 2 * Math.PI);
+      ctx.fillStyle = "green";
+      ctx.fill();
+    }
+
+    drawFlat();
+    drawGlobe();
+  </script>
+</body>
+</html>
